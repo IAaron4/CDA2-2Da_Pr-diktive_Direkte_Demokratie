@@ -83,4 +83,3 @@ Der vollständige wissenschaftliche Blogbeitrag ist unter blog/final_blog_post.m
 - Annabelle McPherson
 - Pascal Trösch
 - Aaron Studer
-[WEITERE TEAMMITGLIEDER, FALLS VORHANDEN]
