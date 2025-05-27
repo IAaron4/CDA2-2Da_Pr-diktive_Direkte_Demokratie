@@ -6,9 +6,9 @@ library(lubridate)
 library(purrr)
 library(broom)
 
-setwd("/Users/pascaltrosch/Documents/CDA2/data")
+setwd("~/data")
 
-abst <- read_xlsx("main_dataset.xlsx")
+abst <- read_xlsx("/raw/DATASET XLSX 09-02-2025.xlsx")
 abst_4 <- abst %>%  filter(d1e1 %in% c(4,6))
 
 
