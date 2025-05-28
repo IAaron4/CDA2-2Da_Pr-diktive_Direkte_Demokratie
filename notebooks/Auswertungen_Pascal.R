@@ -6,12 +6,15 @@ library(lubridate)
 library(purrr)
 library(broom)
 
-setwd("~/data")
+### Data Wrangling ###
 
-abst <- read_xlsx("/raw/DATASET XLSX 09-02-2025.xlsx")
+#Swissvotes-Datensatz laden
+abst <- read_xlsx("data/raw/DATASET XLSX 09-02-2025.xlsx", sheet=2)
+#Swissvotes-Datensatz nach Wirtschafts- und Finanzpolitischen Vorlagen filtern
 abst_4 <- abst %>%  filter(d1e1 %in% c(4,6))
 
 
+#Alle Datumsformate angleichen (Daten vor 1900 werden durch read_xlsx falsch importiert)
 abst_4_1 <- abst_4 %>% slice(15:152)
 abst_4_2 <- abst_4 %>% slice(1:14)
 abst_4_2$datum <- as.Date(abst_4_2$datum, format = "%d.%m.%Y")
@@ -20,20 +23,23 @@ abst_4_1$datum <- as.Date(as.numeric(abst_4_1$datum), origin = "1899-12-30")
 abst_4_1$datum <- format(abst_4_1$datum, "%d.%m.%Y")
 abst_4 <- bind_rows(abst_4_1, abst_4_2)
 
+# Empfehlungsvariable FDP richtig codieren und als numerisch abspeichern (NA's entfernen)
 abst_4$`p-fdp` <- as.numeric(abst_4$`p-fdp`)
 abst_4$`p-fdp` <- ifelse(abst_4$`p-fdp` > 2, NA, abst_4$`p-fdp`)
 abst_4$`p-fdp` <- ifelse(abst_4$`p-fdp`==2, 0, abst_4$`p-fdp`)
 
 
 
-
+# Relevante Variablen aus dem Gesamtdatensatz extrahieren
 abst_4_lm <- abst_4 %>% select(anr, datum, titel_kurz_d, `p-fdp`, contains("annahme"), `volkja-proz`)
+# Fehlende Werte für den Kanton Jura zu NA umcodieren
 abst_4_lm$`ju-annahme` <- ifelse(abst_4_lm$`ju-annahme`==".", NA, abst_4_lm$`ju-annahme`)
 
+#Dichotome Variablen für die Abstimmungsannahme in Datensatz inkludieren
 abst_4_lm_clean <- abst_4_lm %>%
   mutate(across(ends_with("-annahme"), as.character))
 
-# 2. In Long-Format überführen
+# In Long-Format überführen
 abst_long <- abst_4_lm_clean %>%
   pivot_longer(
     cols = ends_with("-annahme"),
@@ -42,45 +48,48 @@ abst_long <- abst_4_lm_clean %>%
     names_transform = list(kanton = ~ sub("-annahme", "", .x))
   )
 
-# 3. Versuchen, die Werte zu numerisieren (nicht-konvertierbare werden NA)
+#  Werte in numeric-Format konvertieren (nicht-konvertierbare werden NA)
 abst_long <- abst_long %>%
   mutate(annahme = readr::parse_number(annahme))
-
 abst_long$`p-fdp`<- as.numeric(abst_long$`p-fdp`)
 abst_long$kt_annahme <- as.numeric(abst_long$kt_annahme)
 
+# Econ-Friendly (für wirtschaftsfreundliches Abstimmen) generieren
+# Abstimmung wird als wirtschaftsfreundlich codiert, wenn Abstimmungsresultat mit FDP-Empfehlung übereinstimmt.
 abst_long$econ_fr <-  abst_long$`p-fdp`*abst_long$kt_annahme
 
+# Jahrzehnte aufgrund der Datumsvariable generieren
 abst_long <- abst_long %>%
   mutate(
     datum = dmy(datum),
     jahr = year(datum),
     
-    # 3. Jahrzehnt berechnen
+
     jahrzehnt = floor(jahr / 10) * 10
   )
 
-### Religionsdatensatz ####
+### Religiöse Ausrichtung der kantone ####
 
 # Verschiedene Jahres-Datensätze einlesen und unbekannte Regionen filtern, 
 # damit keine doppelten/unzuweisbaren Einträge entstehen
-dat_1850 <- read_xlsx("1850.xlsx", skip=3) %>% filter(!is.na(Regionsname))
-dat_1860 <- read_xlsx("1860.xlsx", skip=3) %>% filter(!is.na(Regionsname))
-dat_1870 <- read_xlsx("1870.xlsx", skip=3) %>% filter(!is.na(Regionsname))
-dat_1880 <- read_xlsx("1880.xlsx", skip=3) %>% filter(!is.na(Regionsname))
-dat_1890 <- read_xlsx("1890.xlsx", skip=3) %>% filter(!is.na(Regionsname))
-dat_1900 <- read_xlsx("1900.xlsx", skip=3) %>% filter(!is.na(Regionsname))
-dat_1910 <- read_xlsx("1910.xlsx", skip=3) %>% filter(!is.na(Regionsname))
-dat_1920 <- read_xlsx("1920.xlsx", skip=3) %>% filter(!is.na(Regionsname))
-dat_1930 <- read_xlsx("1930.xlsx", skip=3) %>% filter(!is.na(Regionsname))
-dat_1940 <- read_xlsx("1940.xlsx", skip=3) %>% filter(!is.na(Regionsname))
-dat_1950 <- read_xlsx("1950.xlsx", skip=3) %>% filter(!is.na(Regionsname))
-dat_1960 <- read_xlsx("1960.xlsx", skip=3) %>% filter(!is.na(Regionsname))
-dat_1970 <- read_xlsx("1970.xlsx", skip=3) %>% filter(!is.na(Regionsname))
-dat_1980 <- read_xlsx("1980.xlsx", skip=3) %>% filter(!is.na(Regionsname))
-dat_1990 <- read_xlsx("1990.xlsx", skip=3) %>% filter(!is.na(Regionsname))
-dat_2000 <- read_xlsx("2000.xlsx", skip=3) %>% filter(!is.na(Regionsname))
-dat_2014 <- read_xlsx("2014.xlsx", skip=3) %>% filter(!is.na(Regionsname))
+# Daten stammen vom Bundesamt für Statistik und konnten nur pro Jahrzehnt einzeln als Excel-Datei heruntergeladen werden
+dat_1850 <- read_xlsx("data/raw/religion/1850.xlsx", skip=3) %>% filter(!is.na(Regionsname))
+dat_1860 <- read_xlsx("data/raw/religion/1860.xlsx", skip=3) %>% filter(!is.na(Regionsname))
+dat_1870 <- read_xlsx("data/raw/religion/1870.xlsx", skip=3) %>% filter(!is.na(Regionsname))
+dat_1880 <- read_xlsx("data/raw/religion/1880.xlsx", skip=3) %>% filter(!is.na(Regionsname))
+dat_1890 <- read_xlsx("data/raw/religion/1890.xlsx", skip=3) %>% filter(!is.na(Regionsname))
+dat_1900 <- read_xlsx("data/raw/religion/1900.xlsx", skip=3) %>% filter(!is.na(Regionsname))
+dat_1910 <- read_xlsx("data/raw/religion/1910.xlsx", skip=3) %>% filter(!is.na(Regionsname))
+dat_1920 <- read_xlsx("data/raw/religion/1920.xlsx", skip=3) %>% filter(!is.na(Regionsname))
+dat_1930 <- read_xlsx("data/raw/religion/1930.xlsx", skip=3) %>% filter(!is.na(Regionsname))
+dat_1940 <- read_xlsx("data/raw/religion/1940.xlsx", skip=3) %>% filter(!is.na(Regionsname))
+dat_1950 <- read_xlsx("data/raw/religion/1950.xlsx", skip=3) %>% filter(!is.na(Regionsname))
+dat_1960 <- read_xlsx("data/raw/religion/1960.xlsx", skip=3) %>% filter(!is.na(Regionsname))
+dat_1970 <- read_xlsx("data/raw/religion/1970.xlsx", skip=3) %>% filter(!is.na(Regionsname))
+dat_1980 <- read_xlsx("data/raw/religion/1980.xlsx", skip=3) %>% filter(!is.na(Regionsname))
+dat_1990 <- read_xlsx("data/raw/religion/1990.xlsx", skip=3) %>% filter(!is.na(Regionsname))
+dat_2000 <- read_xlsx("data/raw/religion/2000.xlsx", skip=3) %>% filter(!is.na(Regionsname))
+dat_2014 <- read_xlsx("data/raw/religion/2014.xlsx", skip=3) %>% filter(!is.na(Regionsname))
 
 # Die unterschiedlichen Jahresdatensätze zu einem grossen Datensatz zusammenfügen
 # Merging-Variablen sind die Regions-ID's (BFS) und Regions-Namen
@@ -138,7 +147,7 @@ gl_count <- gl_count %>% select(jahr, wert)
 gl_count <- gl_count %>% pivot_wider(names_from = jahr, values_from = wert)
 
 # Datensatz des BFS mit den Gemeinde-Codes laden
-num <- read_xlsx("Gemeindestand.xlsx")
+num <- read_xlsx("data/raw/religion/Gemeindestand.xlsx")
 num <- num %>% rename("Regions_ID"="BFS Gde-nummer")
 full_dat$Regions_ID <- as.numeric(full_dat$Regions_ID)
 
@@ -161,9 +170,9 @@ full_dat <- full_dat %>% mutate(year=substr(full_dat$year, 3,6))
 full_dat$year <- as.numeric(full_dat$year)
 
 
-write.csv(full_dat, "/Users/pascaltrosch/Downloads/rel_gemeinde.csv")
+#write.csv(full_dat, "/Users/pascaltrosch/Downloads/rel_gemeinde.csv")
 
-
+# Aggregierter Datensatz mit Religionsvariablen erstellen
 df_kanton_agg <- full_dat %>%
   group_by(Kanton, year) %>%
   summarise(rel = {
@@ -176,7 +185,7 @@ df_kanton_agg <- full_dat %>%
     }
   }, .groups = "drop")
 
-# 3. Pivotieren: Kantone als Zeilen, Jahre als Spalten
+# Pivotieren: Kantone als Zeilen, Jahre als Spalten
 df_pivot <- df_kanton_agg %>%
   pivot_wider(names_from = year, values_from = rel)
 
@@ -184,9 +193,12 @@ df_pivot$`2020` <- df_pivot$`2014`
 
 gem <- df_pivot
 
-#### weiterfahren mit Data Wrangling #####
 
 
+
+#### Gesamtdatensatz für die Auswertungen erstellen #####
+
+# Gemeinde-Datensatz für die Religionsauswertung Pivotieren (wide to long)
 gem_long <- gem %>%
   pivot_longer(
     cols = !starts_with("K"),
@@ -197,7 +209,8 @@ gem_long <- gem %>%
     Jahr = as.integer(sub("^X", "", Jahr))
   )
 
-
+# Character-Werte der Religionszugehörigkeit skalieren. Hierbei wird die Religionsskala von 0 (stark katholisch) bis 1 (stark reformiert verwendet)
+# Datne des BFS sind teilweise "schmutzig" mancham ist katholisch/reformiert gross geschrieben, manchmal klein
 gem_long <- gem_long %>% 
   mutate(rel_num=case_when(Religion=="Mehrheit katholisch: ≥ 80,0 %" ~ 0,
                            Religion=="Mehrheit Katholisch: ≥ 80,0 %" ~ 0,
@@ -213,34 +226,41 @@ gem_long <- gem_long %>%
                            Religion=="Mehrheit Reformiert: ≥ 80,0 %" ~ 1,
                            Religion=="Mehrheit mit anderer oder ohne Religionszugehörigkeit: 40,0 - 59,9 %"~0.5))
 
+# Variablen-Namen in beiden Datensätzen angleichen
 abst_long$kanton <- toupper(abst_long$kanton)
 gem_long <- gem_long %>% rename(kanton=Kanton)
 gem_long <- gem_long %>% rename(jahrzehnt=Jahr)
 gem_long$jahrzehnt <- ifelse(gem_long$jahrzehnt==2014, 2010, gem_long$jahrzehnt)
 
+# Merging des Abstimmungs-Datensatzes mit dem Religions-Datensatz
 abst_long <- left_join(abst_long, gem_long, by=c("jahrzehnt", "kanton"))
 
-# Wie oft stimmt econ_fr mit abstimmungsresultat auf ch-ebene überein?
+# Neue Variable generieren: Wie oft stimmt econ_fr mit abstimmungsresultat auf ch-ebene überein?
 abst_long$same_ch <- abst_long$annahme*abst_long$econ_fr
 
+# Dichotome Religionsvariable generieren (0=katholisch, 1=reformiert)
 abst_long$rel_dichotom <- ifelse(abst_long$rel_num<0.1, 0, 1)
 # Welcher kanton stimmt besonders oft wirtschaftsfreundlich oder wirtschaftsunfreundlich?
 same_ch_tab <- abst_long %>% count(kanton, econ_fr) %>% arrange(desc(n))
 jahrzehnt_ch_tab <- abst_long %>% count(kanton, jahrzehnt, econ_fr)
-
 jahrzehnt_ch_tab <- na.omit(jahrzehnt_ch_tab)
 jahrzehnt_ch_tab %>% arrange(desc(n))
 
 
-
+# Lineare/Logistische Regressionsmodelle für gesamte Schweiz rechnen
+# Model 1: Lineare Regression Einfluss Religion auf wirtschaftsfreundliche Abstimmungen
 mod1 <- glm(econ_fr~rel_num, data=abst_long)
 summary(mod1)
+# Model 2: Logistische Regression Einfluss Religion auf wirtschaftsfreundliche Abstimmungen
 mod2 <- glm(econ_fr ~ rel_num, data = abst_long, family = binomial(link = "logit"))
 summary(mod2)
+# Model 3: Logistische Regression unter Einbeziehungen kantonaler Unterschiede
 mod3 <- glm(econ_fr ~ rel_num+kanton, data = abst_long, family = binomial(link = "logit"))
 summary(mod3)
 
 
+
+# Interpretation der Koeffizienten der logistischen Regression
 coef(mod2)
 
 # Wahrscheinlichkeit für rel_num = 0
@@ -257,11 +277,6 @@ plogis(coef(mod2)[1] + coef(mod2)[2] * 0.8)
 plogis(coef(mod2)[1] + coef(mod2)[2] * 0.2)
 
 
-
-
-
-summary(abst_long$econ_fr)
-
 ## Religion und Abstimmung gruppiert nach Jahrzehnt
 # Daten vorbereiten mit Prozentanteilen
 plot_data <- abst_long %>%
@@ -271,7 +286,7 @@ plot_data <- abst_long %>%
   mutate(prozent = n / sum(n) * 100) %>%
   ungroup()
 
-# Plot mit Prozentzahlen als Text
+# Abbildung 4: Plot Vergleich Abstimmungen zwischen ref und kath Kantone mit Prozentzahlen als Text
 plot_rel_jahrzehnt <- ggplot(plot_data, aes(x = factor(jahrzehnt), y = n, fill = factor(econ_fr))) +
   geom_col(position = "stack", width = 0.6) +
   geom_text(
@@ -296,6 +311,70 @@ plot_rel_jahrzehnt
 
 
 
+## Vergleich der Kantone AR/AI und AG ##
+
+# Datensatz nach Kantonen AR/AI filtern
+ar_ai <- abst_long %>% filter(kanton=="AR" | kanton=="AI")
+
+# Abbildung 7: Vergleich Abstimmungen AR/AI
+plot_arai_1 <- ar_ai %>% count(kanton, econ_fr) %>%
+  filter(!is.na(econ_fr)) %>%
+  ggplot(aes(x = kanton, y = n, fill = as.factor(econ_fr))) +
+  geom_col(position = position_dodge(width = 0.9)) +
+  geom_text(
+    aes(label = n),
+    position = position_dodge(width = 0.9),
+    vjust = -0.3,
+    size = 3.5
+  ) +
+  labs(
+    x = "Kanton",
+    y = "Anzahl",
+    fill = "Abstimmungsresultat"
+  ) +
+  scale_fill_manual(
+    values = c("0" = "lightgray", "1" = "steelblue"),
+    labels = c("0" = "Nicht wirtschaftsfreundlich", "1" = "Wirtschaftsfreundlich")) +
+  theme_minimal()
+plot_arai_1
+
+# Abbildung 8: Abstimmungen AR/AI über Zeit
+plot_arai_2 <- ar_ai %>%
+  count(jahrzehnt, kanton, econ_fr) %>% filter(econ_fr==1) %>% 
+  ggplot(aes(x = jahrzehnt, y = n, color = kanton, group = kanton)) +
+  geom_point(position = position_jitter(width = 0.5, height = 0), size = 3) +
+  labs(x = "Jahrzehnt", y = "Anzahl", color = "Kanton") +
+  scale_color_manual(
+    values = c("AI" = "royalblue", "AR" = "peachpuff"))+
+  theme_minimal()
+
+plot_arai_2
+
+
+
+# Abbildung 9: Abstimmung KT AG vs. Schweizer Durchschnitt
+ag <- abst_long %>% filter(kanton=="AG")
+
+
+plot_data_ag2 <- abst_long %>%
+  count(jahrzehnt, econ_fr) %>%
+  filter(!is.na(jahrzehnt), !is.na(econ_fr)) %>%
+  mutate(n_pro_25 = n / 25) %>% 
+  filter(econ_fr==1)
+plot_data_ag2$ag <- ag %>% count(jahrzehnt, econ_fr) %>% filter(!is.na(econ_fr)) %>% filter(econ_fr==1)
+
+plot_ag_2 <- ggplot(plot_data_ag2, aes(x=jahrzehnt))+
+  geom_point(aes(y=n_pro_25, color = "Durchschnitt Schweiz"), size = 3)+
+  geom_point(aes(y=ag$n, color="Kanton Aargau"), size = 3, shape = 17)+
+  scale_color_manual(
+    name = "Abstimmungsergebnis",
+    values = c("Durchschnitt Schweiz" = "steelblue", "Kanton Aargau" = "firebrick")
+  ) +
+  labs(x = "Jahrzehnt", y = "Anzahl") +
+  theme_minimal()+
+  geom_vline(xintercept = c(1920, 1960), linetype = "dashed", color = "gray40", linewidth = 0.7)
+
+plot_ag_2
 
 
 
@@ -305,73 +384,5 @@ plot_rel_jahrzehnt
 
 
 
-
-
-
-
-modelle_pro_kanton <- abst_long %>%
-  group_by(kanton) %>%
-  nest() %>%
-  mutate(
-    model = map(data, ~ glm(econ_fr ~ rel_num, data = ., family = binomial)),
-    koeffizienten = map(model, tidy)
-  ) %>%
-  unnest(koeffizienten)
-print(modelle_pro_kanton, n = Inf)
-
-#abst_4$`p-fdp` <- as.factor(abst_4$`p-fdp`)
-#abst_4$annahme <- as.factor(abst_4$annahme)
-abst_4 <- abst_4 %>%
-  mutate(across(c(anr, datum, titel_kurz_d,`p-fdp`, annahme, `be-annahme`, `vs-annahme`), as.factor))
-abst_4 <- abst_4 %>%
-  mutate(across(all_of(names(abst_4)[655:860]), as.factor))
-
-abst4_lm <- abst_4 %>%
-  select(anr, datum, titel_kurz_d, `p-fdp`, contains("japroz"), contains("annahme"))
-
-abst_long <- abst4_lm %>%
-  pivot_longer(
-    cols = ends_with("-japroz"),  # oder: matches("^[a-z]{2}-japroz$")
-    names_to = "kanton",
-    names_pattern = "(.*)-japroz",
-    values_to = "japroz"
-  )
-abst_long <- abst_long %>%
-  pivot_longer(
-    cols = ends_with("-annahme"),
-    names_to = "kanton2",
-    names_pattern = "(.*)-annahme",
-    values_to = "annahme_kanton"
-  ) %>%
-  filter(kanton == kanton2) %>%  # sicherstellen, dass kanton und kanton2 übereinstimmen
-  select(-kanton2)
-
-abst_long <- abst_long %>%
-  mutate(across(c(kanton, annahme_kanton), as.factor))
-abst_long <- abst_long %>%
-  mutate(across(japroz, as.numeric))
-model_vd <- glm(japroz ~ `p-fdp`, data = abst_long, subset = kanton == "vd")
-model_fr <- glm(japroz ~ `p-fdp`, data = abst_long, subset = kanton == "fr")
-summary(model_vd)
-summary(model_fr)
-
-
-
-
-
-abst_4_bevs <- abst_4 %>% select(c(anr, datum, titel_kurz_d, `be-japroz`, `be-annahme`, `vs-japroz`, `vs-annahme`, `p-fdp`, annahme))
-abst_4_bevs <- abst_4_bevs %>% rename("be_proz"=`be-japroz`, "vs_proz"=`vs-japroz`)
-abst_4_bevs <- pivot_longer(abst_4_bevs, cols=c(4:7), names_to="cantons", values_to=c("japroz", "annahme"))
-abst_4_bevs$japroz <- as.numeric(abst_4_bevs$japroz)
-
-plot <- ggplot(abst_4_bevs, aes(datum, japroz, color=`p-fdp`))+geom_point()+facet_grid(cols=vars(cantons))
-
-model1 <- lm(japroz~`p-fdp`, data=abst_4_bevs, subset =(cantons))
-model2 <- glm(`p-fdp` ~ cantons, data = abst_4_bevs, family = binomial())
-
-abst_3$datum[5:51] <- as.Date(as.integer(abst_3$datum[5:51]), origin = "1899-12-30")
-
-
-t.test(japroz ~ cantons, data = abst_4_bevs, var.equal = TRUE)
 
 
