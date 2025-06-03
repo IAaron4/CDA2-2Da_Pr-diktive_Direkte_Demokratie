@@ -303,8 +303,9 @@ plot_rel_jahrzehnt <- ggplot(plot_data, aes(x = factor(jahrzehnt), y = n, fill =
     values = c("0" = "lightgray", "1" = "steelblue"),
     labels = c("0" = "Nicht wirtschaftsfreundlich", "1" = "Wirtschaftsfreundlich")
   ) +
-  labs(x = "Jahrzehnt", y = "Anzahl", fill = "Abstimmungsresultat") +
-  theme_minimal()
+  labs(x = "Jahrzehnt", y = "Anzahl", fill = "Abstimmungsresultat", title="Abstimmungsresultate reformierte vs. katholische Kantone") +
+  theme_minimal()+
+  theme(plot.title = element_text(hjust = 0.5))
 
 plot_rel_jahrzehnt
 
@@ -330,12 +331,14 @@ plot_arai_1 <- ar_ai %>% count(kanton, econ_fr) %>%
   labs(
     x = "Kanton",
     y = "Anzahl",
-    fill = "Abstimmungsresultat"
+    fill = "Abstimmungsresultat",
+    title="Abstimmungsresultate AR/AI"
   ) +
   scale_fill_manual(
     values = c("0" = "lightgray", "1" = "steelblue"),
     labels = c("0" = "Nicht wirtschaftsfreundlich", "1" = "Wirtschaftsfreundlich")) +
-  theme_minimal()
+  theme_minimal()+
+  theme(plot.title = element_text(hjust = 0.5))
 plot_arai_1
 
 # Abbildung 8: Abstimmungen AR/AI über Zeit
@@ -343,10 +346,11 @@ plot_arai_2 <- ar_ai %>%
   count(jahrzehnt, kanton, econ_fr) %>% filter(econ_fr==1) %>% 
   ggplot(aes(x = jahrzehnt, y = n, color = kanton, group = kanton)) +
   geom_point(position = position_jitter(width = 0.5, height = 0), size = 3) +
-  labs(x = "Jahrzehnt", y = "Anzahl", color = "Kanton") +
+  labs(x = "Jahrzehnt", y = "Anzahl", color = "Kanton", title="Unterschiede AR/AI über Zeit") +
   scale_color_manual(
     values = c("AI" = "royalblue", "AR" = "peachpuff"))+
-  theme_minimal()
+  theme_minimal()+
+  theme(plot.title = element_text(hjust = 0.5))
 
 plot_arai_2
 
@@ -370,9 +374,10 @@ plot_ag_2 <- ggplot(plot_data_ag2, aes(x=jahrzehnt))+
     name = "Abstimmungsergebnis",
     values = c("Durchschnitt Schweiz" = "steelblue", "Kanton Aargau" = "firebrick")
   ) +
-  labs(x = "Jahrzehnt", y = "Anzahl") +
+  labs(x = "Jahrzehnt", y = "Anzahl", title="Abstimmungen Kt AG vs. Schweizer Durchschnitt") +
   theme_minimal()+
-  geom_vline(xintercept = c(1920, 1960), linetype = "dashed", color = "gray40", linewidth = 0.7)
+  geom_vline(xintercept = c(1920, 1960), linetype = "dashed", color = "gray40", linewidth = 0.7)+
+  theme(plot.title = element_text(hjust = 0.5))
 
 plot_ag_2
 
