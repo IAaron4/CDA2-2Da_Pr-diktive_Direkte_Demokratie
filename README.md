@@ -15,11 +15,13 @@ Ziel dieses Projekts ist die Analyse und aussagekräftige Darstellung von Volksa
     - `processed/`: Aufbereitete Datensätze für die Analyse
 - `notebooks/`: Jupyter Notebooks mit den durchgeführten Analysen
     - `01_exploratory_analysis.ipynb`: Explorative Datenanalyse
-    - `02_thematic_analysis.ipynb`: Themenspezifische Analysen
-    - `03_predictive_models.ipynb`: Prädiktive Modelle (für 4Da-Studierende)
-- `scripts/`: Python-Skripte für Datenverarbeitung und -analyse
+    - `01_a_cantons_analyzed.ipynb`: Explorative Datenanalyse - Kantone analysiert
+    - `01_b_cantons_categorized.ipynb`: Explorative Datenanalyse - Kantone kategorisiert
+    - `02_religion_analysis.ipynb`: Analyse der Religionsdaten
+    - `03_logistic_regression_model.ipynb`: Logistische Regressionsmodelle
+    - `04_additional_evaluation.R`: Weitere Auswertungen und Modelle in R
+    - `05_additional_visualizations_blog.ipynb`: Weitere Visualisierungen für den wissenschaftlichen Blog-Artikel
 - `visualizations/`: Generierte Grafiken und Visualisierungen
-- `blog/`: Quellcode des wissenschaftlichen Blogbeitrags
 - `presentations/`: Präsentationsmaterialien
 - `docs/`: Zusätzliche Dokumentation und Ressourcen
 
@@ -30,13 +32,19 @@ Das Projekt kombiniert verschiedene Methoden der Datenanalyse:
 
 - Explorative Datenanalyse (EDA)
 - Statistische Auswertungen
+- Lineare- / Logistische Regressionsmodelle (LLR)
+- Multiple Lineare- / Logistische Regressionsmodelle (MLR)
 - Visualisierung von zeitlichen Trends und thematischen Schwerpunkten
-- Anwendung des Satzes von Bayes für einfache Prognosen
 - Web-Datenbeschaffung und Analyse (für 4Da-Studierende)
 
 ## Thematischer Fokus
 
-In diesem Projekt konzentrieren wir uns auf [THEMA EINSETZEN, z.B. "die Entwicklung der schweizerischen Umwelt- und Energiepolitik anhand von Volksabstimmungen"]. Der Fokus wurde gewählt, um [BEGRÜNDUNG EINSETZEN, z.B. "aktuelle Debatten zur Energiewende im historischen Kontext zu betrachten"].
+Lassen sich Unterschiede zwischen protestantischen und katholischen Gebieten feststellen, wenn
+es um politische Entscheide geht? Für eine solche Untersuchung eignet sich die Schweiz besonders gut, da die
+Bevölkerung dank der direkten Demokratie regelmässig die Gelegenheit hat, ihre politischen Ansichten kundzu-
+tun. Wir untersuchen Unterschiede im Abstimmungsverhalten von protestantischen und katholischen Gebiete
+und ergründen, ob die zunehmende Säkularisierung in jüngeren Jahren zu einer Veränderung im Abstimmungs-
+verhalten geführt hat.
 
 ## Installation und Ausführung
 
@@ -60,6 +68,8 @@ jupyter notebook
 
 ## Abhängigkeiten
 
+Alle packages sind im requirements.txt definiert.
+
 - Python 3.9+
 - pandas
 - numpy
@@ -68,15 +78,6 @@ jupyter notebook
 - scikit-learn
 - jupyter
 - plotly
-
-## Ergebnisse
-Die Hauptergebnisse unserer Analyse sind:
-
-[HAUPTERKENNTNIS 1]
-[HAUPTERKENNTNIS 2]
-[HAUPTERKENNTNIS 3]
-
-Der vollständige wissenschaftliche Blogbeitrag ist unter blog/final_blog_post.md zu finden.
 
 ## Team
 

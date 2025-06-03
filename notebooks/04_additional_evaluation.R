@@ -9,7 +9,7 @@ library(broom)
 ### Data Wrangling ###
 
 #Swissvotes-Datensatz laden
-abst <- read_xlsx("data/raw/DATASET XLSX 09-02-2025.xlsx", sheet=2)
+abst <- read_xlsx("../data/raw/DATASET XLSX 09-02-2025.xlsx", sheet=2)
 #Swissvotes-Datensatz nach Wirtschafts- und Finanzpolitischen Vorlagen filtern
 abst_4 <- abst %>%  filter(d1e1 %in% c(4,6))
 
@@ -73,23 +73,23 @@ abst_long <- abst_long %>%
 # Verschiedene Jahres-Datensätze einlesen und unbekannte Regionen filtern, 
 # damit keine doppelten/unzuweisbaren Einträge entstehen
 # Daten stammen vom Bundesamt für Statistik und konnten nur pro Jahrzehnt einzeln als Excel-Datei heruntergeladen werden
-dat_1850 <- read_xlsx("data/raw/religion/1850.xlsx", skip=3) %>% filter(!is.na(Regionsname))
-dat_1860 <- read_xlsx("data/raw/religion/1860.xlsx", skip=3) %>% filter(!is.na(Regionsname))
-dat_1870 <- read_xlsx("data/raw/religion/1870.xlsx", skip=3) %>% filter(!is.na(Regionsname))
-dat_1880 <- read_xlsx("data/raw/religion/1880.xlsx", skip=3) %>% filter(!is.na(Regionsname))
-dat_1890 <- read_xlsx("data/raw/religion/1890.xlsx", skip=3) %>% filter(!is.na(Regionsname))
-dat_1900 <- read_xlsx("data/raw/religion/1900.xlsx", skip=3) %>% filter(!is.na(Regionsname))
-dat_1910 <- read_xlsx("data/raw/religion/1910.xlsx", skip=3) %>% filter(!is.na(Regionsname))
-dat_1920 <- read_xlsx("data/raw/religion/1920.xlsx", skip=3) %>% filter(!is.na(Regionsname))
-dat_1930 <- read_xlsx("data/raw/religion/1930.xlsx", skip=3) %>% filter(!is.na(Regionsname))
-dat_1940 <- read_xlsx("data/raw/religion/1940.xlsx", skip=3) %>% filter(!is.na(Regionsname))
-dat_1950 <- read_xlsx("data/raw/religion/1950.xlsx", skip=3) %>% filter(!is.na(Regionsname))
-dat_1960 <- read_xlsx("data/raw/religion/1960.xlsx", skip=3) %>% filter(!is.na(Regionsname))
-dat_1970 <- read_xlsx("data/raw/religion/1970.xlsx", skip=3) %>% filter(!is.na(Regionsname))
-dat_1980 <- read_xlsx("data/raw/religion/1980.xlsx", skip=3) %>% filter(!is.na(Regionsname))
-dat_1990 <- read_xlsx("data/raw/religion/1990.xlsx", skip=3) %>% filter(!is.na(Regionsname))
-dat_2000 <- read_xlsx("data/raw/religion/2000.xlsx", skip=3) %>% filter(!is.na(Regionsname))
-dat_2014 <- read_xlsx("data/raw/religion/2014.xlsx", skip=3) %>% filter(!is.na(Regionsname))
+dat_1850 <- read_xlsx("../data/raw/religion/1850.xlsx", skip=3) %>% filter(!is.na(Regionsname))
+dat_1860 <- read_xlsx("../data/raw/religion/1860.xlsx", skip=3) %>% filter(!is.na(Regionsname))
+dat_1870 <- read_xlsx("../data/raw/religion/1870.xlsx", skip=3) %>% filter(!is.na(Regionsname))
+dat_1880 <- read_xlsx("../data/raw/religion/1880.xlsx", skip=3) %>% filter(!is.na(Regionsname))
+dat_1890 <- read_xlsx("../data/raw/religion/1890.xlsx", skip=3) %>% filter(!is.na(Regionsname))
+dat_1900 <- read_xlsx("../data/raw/religion/1900.xlsx", skip=3) %>% filter(!is.na(Regionsname))
+dat_1910 <- read_xlsx("../data/raw/religion/1910.xlsx", skip=3) %>% filter(!is.na(Regionsname))
+dat_1920 <- read_xlsx("../data/raw/religion/1920.xlsx", skip=3) %>% filter(!is.na(Regionsname))
+dat_1930 <- read_xlsx("../data/raw/religion/1930.xlsx", skip=3) %>% filter(!is.na(Regionsname))
+dat_1940 <- read_xlsx("../data/raw/religion/1940.xlsx", skip=3) %>% filter(!is.na(Regionsname))
+dat_1950 <- read_xlsx("../data/raw/religion/1950.xlsx", skip=3) %>% filter(!is.na(Regionsname))
+dat_1960 <- read_xlsx("../data/raw/religion/1960.xlsx", skip=3) %>% filter(!is.na(Regionsname))
+dat_1970 <- read_xlsx("../data/raw/religion/1970.xlsx", skip=3) %>% filter(!is.na(Regionsname))
+dat_1980 <- read_xlsx("../data/raw/religion/1980.xlsx", skip=3) %>% filter(!is.na(Regionsname))
+dat_1990 <- read_xlsx("../data/raw/religion/1990.xlsx", skip=3) %>% filter(!is.na(Regionsname))
+dat_2000 <- read_xlsx("../data/raw/religion/2000.xlsx", skip=3) %>% filter(!is.na(Regionsname))
+dat_2014 <- read_xlsx("../data/raw/religion/2014.xlsx", skip=3) %>% filter(!is.na(Regionsname))
 
 # Die unterschiedlichen Jahresdatensätze zu einem grossen Datensatz zusammenfügen
 # Merging-Variablen sind die Regions-ID's (BFS) und Regions-Namen
@@ -147,7 +147,7 @@ gl_count <- gl_count %>% select(jahr, wert)
 gl_count <- gl_count %>% pivot_wider(names_from = jahr, values_from = wert)
 
 # Datensatz des BFS mit den Gemeinde-Codes laden
-num <- read_xlsx("data/raw/religion/Gemeindestand.xlsx")
+num <- read_xlsx("../data/raw/religion/Gemeindestand.xlsx")
 num <- num %>% rename("Regions_ID"="BFS Gde-nummer")
 full_dat$Regions_ID <- as.numeric(full_dat$Regions_ID)
 
