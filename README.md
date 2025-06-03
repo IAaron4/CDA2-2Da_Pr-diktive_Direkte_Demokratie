@@ -51,7 +51,7 @@ verhalten geführt hat.
 
 ``` bash
 # Repository klonen
-git clone https://github.com/username/swissvotes-analysis.git
+git clone https://github.com/IAaron4/CDA2-2Da_Pr-diktive_Direkte_Demokratie.git
 cd swissvotes-analysis
 
 # Virtuelle Umgebung erstellen und aktivieren
